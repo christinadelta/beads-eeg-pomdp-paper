@@ -144,7 +144,7 @@ for sub = 1:nsubs
         R.thisq         = R.q(cond);
         
         % testing the number of draws
-        R.subdraws          = draws_for_testing{cond};
+        R.subdraws                      = draws_for_testing{cond};
 
         % define the objective function and get optimal parameters
         obFunc                          = @(x) mdpBeads([x(1)], R, cond_sequences, cond_choiceData);
