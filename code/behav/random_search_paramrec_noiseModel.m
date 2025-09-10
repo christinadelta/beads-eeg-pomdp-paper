@@ -95,36 +95,36 @@ end
 
 %% evaluate parameter recovery
 
-% pearsons correlations
-corr_beta_08        = corr(true_beta, fit_beta(:, 1));
-corr_beta_06        = corr(true_beta, fit_beta(:, 2));
+% % pearsons correlations
+% corr_beta_08        = corr(true_beta, fit_beta(:, 1));
+% corr_beta_06        = corr(true_beta, fit_beta(:, 2));
+% 
+% % bias
+% bias_beta_08        = mean(fit_beta(:, 1) - true_beta);
+% bias_beta_06        = mean(fit_beta(:, 2) - true_beta);
+% 
+% % RMSE
+% rmse_beta_08        = sqrt(mean((fit_beta(:, 1) - true_beta).^2));
+% rmse_beta_06        = sqrt(mean((fit_beta(:, 2) - true_beta).^2));
+% 
+% % standard deviation 
+% std_beta_08     = std(fit_beta(:, 1) - true_beta);
+% std_beta_06     = std(fit_beta(:, 2) - true_beta);
+% 
+% %% display results
+% fprintf('Parameter Recovery Results:\n');
+% fprintf('0.8 Condition:\n');
+% fprintf('Correlation (Beta): %.3f\n', corr_beta_08);
+% fprintf('Bias (Beta): %.3f\n', bias_beta_08);
+% fprintf('RMSE (Beta): %.3f\n', rmse_beta_08);
+% fprintf('Standard Deviation (Beta): %.3f\n', std_beta_08);
+% fprintf('0.6 Condition:\n');
+% fprintf('Correlation (Beta): %.3f\n', corr_beta_06);
+% fprintf('Bias (Beta): %.3f\n', bias_beta_06);
+% fprintf('RMSE (Beta): %.3f\n', rmse_beta_06);
+% fprintf('Standard Deviation (Beta): %.3f\n', std_beta_06);
 
-% bias
-bias_beta_08        = mean(fit_beta(:, 1) - true_beta);
-bias_beta_06        = mean(fit_beta(:, 2) - true_beta);
-
-% RMSE
-rmse_beta_08        = sqrt(mean((fit_beta(:, 1) - true_beta).^2));
-rmse_beta_06        = sqrt(mean((fit_beta(:, 2) - true_beta).^2));
-
-% standard deviation 
-std_beta_08     = std(fit_beta(:, 1) - true_beta);
-std_beta_06     = std(fit_beta(:, 2) - true_beta);
-
-%% display results
-fprintf('Parameter Recovery Results:\n');
-fprintf('0.8 Condition:\n');
-fprintf('Correlation (Beta): %.3f\n', corr_beta_08);
-fprintf('Bias (Beta): %.3f\n', bias_beta_08);
-fprintf('RMSE (Beta): %.3f\n', rmse_beta_08);
-fprintf('Standard Deviation (Beta): %.3f\n', std_beta_08);
-fprintf('0.6 Condition:\n');
-fprintf('Correlation (Beta): %.3f\n', corr_beta_06);
-fprintf('Bias (Beta): %.3f\n', bias_beta_06);
-fprintf('RMSE (Beta): %.3f\n', rmse_beta_06);
-fprintf('Standard Deviation (Beta): %.3f\n', std_beta_06);
-
-%% visualisation (Scatterplots)
+%% visualisation (Scatterplots; Supplementary Figure 5A)
 figure;
 
 subplot(1, 2, 1);
@@ -141,37 +141,37 @@ grid on;
 
 %% evaluate recovery of sampling rates
 
-% correlations
-corr_draws_08 = corr(sim_draws(:, 1), fit_draws(:, 1));
-corr_draws_06 = corr(sim_draws(:, 2), fit_draws(:, 2));
+% % correlations
+% corr_draws_08 = corr(sim_draws(:, 1), fit_draws(:, 1));
+% corr_draws_06 = corr(sim_draws(:, 2), fit_draws(:, 2));
+% 
+% % bias
+% bias_draws_08 = mean(fit_draws(:, 1) - sim_draws(:, 1));
+% bias_draws_06 = mean(fit_draws(:, 2) - sim_draws(:, 2));
+% 
+% % RMSE
+% rmse_draws_08 = sqrt(mean((fit_draws(:, 1) - sim_draws(:, 1)).^2));
+% rmse_draws_06 = sqrt(mean((fit_draws(:, 2) - sim_draws(:, 2)).^2));
+% 
+% % standard deviation 
+% std_draws_08    = std(fit_draws(:, 1) - sim_draws(:, 1));
+% std_draws_06    = std(fit_draws(:, 2) - sim_draws(:, 2));
+% 
+% %% display results
+% 
+% fprintf('Sampling Rate Recovery Results:\n');
+% fprintf('0.8 Condition:\n');
+% fprintf('Correlation: %.3f\n', corr_draws_08);
+% fprintf('Bias: %.3f\n', bias_draws_08);
+% fprintf('RMSE: %.3f\n', rmse_draws_08);
+% fprintf('Standard Deviation: %.3f\n', std_draws_08);
+% fprintf('0.6 Condition:\n');
+% fprintf('Correlation: %.3f\n', corr_draws_06);
+% fprintf('Bias: %.3f\n', bias_draws_06);
+% fprintf('RMSE: %.3f\n', rmse_draws_06);
+% fprintf('Standard Deviation: %.3f\n', std_draws_06);
 
-% bias
-bias_draws_08 = mean(fit_draws(:, 1) - sim_draws(:, 1));
-bias_draws_06 = mean(fit_draws(:, 2) - sim_draws(:, 2));
-
-% RMSE
-rmse_draws_08 = sqrt(mean((fit_draws(:, 1) - sim_draws(:, 1)).^2));
-rmse_draws_06 = sqrt(mean((fit_draws(:, 2) - sim_draws(:, 2)).^2));
-
-% standard deviation 
-std_draws_08    = std(fit_draws(:, 1) - sim_draws(:, 1));
-std_draws_06    = std(fit_draws(:, 2) - sim_draws(:, 2));
-
-%% display results
-
-fprintf('Sampling Rate Recovery Results:\n');
-fprintf('0.8 Condition:\n');
-fprintf('Correlation: %.3f\n', corr_draws_08);
-fprintf('Bias: %.3f\n', bias_draws_08);
-fprintf('RMSE: %.3f\n', rmse_draws_08);
-fprintf('Standard Deviation: %.3f\n', std_draws_08);
-fprintf('0.6 Condition:\n');
-fprintf('Correlation: %.3f\n', corr_draws_06);
-fprintf('Bias: %.3f\n', bias_draws_06);
-fprintf('RMSE: %.3f\n', rmse_draws_06);
-fprintf('Standard Deviation: %.3f\n', std_draws_06);
-
-%% Visualisation (Scatterplots)
+%% Visualisation (Scatterplots; Supplementary Figure 5B)
 
 figure;
 % 0.8 Condition
@@ -199,51 +199,51 @@ line([min_draws max_draws], [min_draws max_draws], 'Color', 'k', 'LineStyle', '-
 grid on;
 
 %% thresholds for "well-recovered"
-% parameter recovery thresholds (based on RMSE from 0.8 condition)
-threshold_beta_08   = rmse_beta_08;
-threshold_beta_06   = rmse_beta_06;
-
-% sampling rate recovery thresholds (based on RMSE from 0.8 condition)
-threshold_draws_08 = rmse_draws_08; % RMSE for sampling rates in 0.8 condition
-threshold_draws_06 = rmse_draws_06; % RMSE for sampling rates in 0.8 condition
-
-%% compute absolute errors
-% parameter recovery errors
-error_beta_08 = abs(fit_beta(:, 1) - true_beta);
-error_beta_06 = abs(fit_beta(:, 2) - true_beta);
-
-% sampling rate recovery errors
-error_draws_08 = abs(fit_draws(:, 1) - sim_draws(:, 1));
-error_draws_06 = abs(fit_draws(:, 2) - sim_draws(:, 2));
-
-%% visualise absolute error
-
-% Visualize absolute error histograms in two subplots with overlaid conditions
-figure;
-
-% Beta Errors
-subplot(1, 2, 1);
-histogram(error_beta_08, 20, 'FaceColor', [1 0 0], 'FaceAlpha', 0.5, 'DisplayName', '0.8 Condition');
-hold on;
-histogram(error_beta_06, 20, 'FaceColor', [0 0 1], 'FaceAlpha', 0.4, 'DisplayName', '0.6 Condition');
-xlabel('Absolute Error for \beta');
-ylabel('Frequency');
-title('Histogram of \beta Recovery Errors');
-legend('show');
-grid on;
-
-% sapling rates error
-subplot(1, 2, 2);
-histogram(error_draws_08, 20, 'FaceColor', [1 0 0], 'FaceAlpha', 0.5, 'DisplayName', '0.8 Condition');
-hold on;
-histogram(error_draws_06, 20, 'FaceColor', [0 0 1], 'FaceAlpha', 0.4, 'DisplayName', '0.6 Condition');
-xlabel('Absolute Error for sampling rates');
-ylabel('Frequency');
-title('Histogram of Samples Recovery Errors');
-legend('show');
-grid on;
-
-fontsize(gcf, 20, "points");
+% % parameter recovery thresholds (based on RMSE from 0.8 condition)
+% threshold_beta_08   = rmse_beta_08;
+% threshold_beta_06   = rmse_beta_06;
+% 
+% % sampling rate recovery thresholds (based on RMSE from 0.8 condition)
+% threshold_draws_08 = rmse_draws_08; % RMSE for sampling rates in 0.8 condition
+% threshold_draws_06 = rmse_draws_06; % RMSE for sampling rates in 0.8 condition
+% 
+% %% compute absolute errors
+% % parameter recovery errors
+% error_beta_08 = abs(fit_beta(:, 1) - true_beta);
+% error_beta_06 = abs(fit_beta(:, 2) - true_beta);
+% 
+% % sampling rate recovery errors
+% error_draws_08 = abs(fit_draws(:, 1) - sim_draws(:, 1));
+% error_draws_06 = abs(fit_draws(:, 2) - sim_draws(:, 2));
+% 
+% %% visualise absolute error
+% 
+% % Visualize absolute error histograms in two subplots with overlaid conditions
+% figure;
+% 
+% % Beta Errors
+% subplot(1, 2, 1);
+% histogram(error_beta_08, 20, 'FaceColor', [1 0 0], 'FaceAlpha', 0.5, 'DisplayName', '0.8 Condition');
+% hold on;
+% histogram(error_beta_06, 20, 'FaceColor', [0 0 1], 'FaceAlpha', 0.4, 'DisplayName', '0.6 Condition');
+% xlabel('Absolute Error for \beta');
+% ylabel('Frequency');
+% title('Histogram of \beta Recovery Errors');
+% legend('show');
+% grid on;
+% 
+% % sapling rates error
+% subplot(1, 2, 2);
+% histogram(error_draws_08, 20, 'FaceColor', [1 0 0], 'FaceAlpha', 0.5, 'DisplayName', '0.8 Condition');
+% hold on;
+% histogram(error_draws_06, 20, 'FaceColor', [0 0 1], 'FaceAlpha', 0.4, 'DisplayName', '0.6 Condition');
+% xlabel('Absolute Error for sampling rates');
+% ylabel('Frequency');
+% title('Histogram of Samples Recovery Errors');
+% legend('show');
+% grid on;
+% 
+% fontsize(gcf, 20, "points");
 
 
 
