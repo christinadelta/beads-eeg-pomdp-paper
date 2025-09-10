@@ -21,8 +21,8 @@ set(0,'DefaultFigureWindowStyle','docked')
 % GET PATHS & DEFINE VARIABLES
 % The four next lines (paths) should be changed to your paths 
 startpath       = '/Users/christinadelta/githubstuff/rhul_stuff/SocialDeMa/';
-datapath        = '/Users/christinadelta/Desktop/mygitrepos/optimal_stopping_problems/experiments/results';
-resultspath     = fullfile(datapath, 'beads', 'behav');
+datapath        = '/Users/christinadelta/gitrepos/SocialDeMa/experiments/results';
+resultspath     = fullfile(datapath, 'beads');
 croppedpath     = fullfile(startpath, 'analysis', 'beads', 'behav', 'cropped');
 
 task            = 'beads';
@@ -46,11 +46,11 @@ diff_avacc              = nan(nsubs,1);
 % Define number of starts
 num_starts              = 1;
 
-%% loop over subjects and extarct behavioural data 
+%% fit cost model to participant data
 
 for sub = 1:nsubs
 
-    fprintf('loading beads block data\n')  
+    fprintf('loading beads block data\n') 
     subject = subs(sub).name;
     subdir  = fullfile(resultspath,subject);
     fprintf('\t reading data from subject %d\n',sub); 
@@ -144,7 +144,7 @@ for sub = 1:nsubs
         R.thisq         = R.q(cond);
         
         % testing the number of draws
-        R.subdraws                      = draws_for_testing{cond};
+        R.subdraws          = draws_for_testing{cond};
 
         % define the objective function and get optimal parameters
         obFunc                          = @(x) mdpBeads([x(1)], R, cond_sequences, cond_choiceData);
@@ -196,7 +196,7 @@ for sub = 1:nsubs
     end % end of conditions loop
 end % end of subjects loop
 
-%% plot parameter values and ll
+%% plot parameter values and nll (Supplementary figure S1 B)
 
 % Define Data for Two Conditions
 Cs_0_8          = allsub_fitted_sample(:,1); 
@@ -232,15 +232,17 @@ scatter(2 + (rand(size(Cs_0_6)) - 0.5) * jitter, Cs_0_6, 'filled', 'r'); % Jitte
 fontsize(gcf, 20, "points");
 hold off;
 
-%% plot nll 
+% plot nll 
 
 % Create Density Plot
 figure;
 [f1, xi1] = ksdensity(allsub_ll(:, 1)); % 0.8 Condition
 [f2, xi2] = ksdensity(allsub_ll(:, 2)); % 0.6 Condition
-plot(xi1, f1, 'r', 'LineWidth', 2); % Density for 0.8
+
+% Plot filled density curves
+fill(xi1, f1, 'r', 'FaceAlpha', 0.5, 'EdgeColor', 'r', 'LineWidth', 2); % Filled density for 0.8
 hold on;
-plot(xi2, f2, 'b', 'LineWidth', 2); % Density for 0.6
+fill(xi2, f2, 'b', 'FaceAlpha', 0.5, 'EdgeColor', 'b', 'LineWidth', 2); % Filled density for 0.6
 
 % Customise Plot
 legend({'0.8 Condition', '0.6 Condition'}, 'Location', 'Best');
@@ -250,48 +252,8 @@ title('Density Plot of NLL Values');
 fontsize(gcf, 20, "points");
 hold off;
 
-%% plot sampling rates for cs model 1
 
-human_draws         = [easy_avdraws diff_avdraws];
-cs_model_draws      = fit_samples_v1;
-
-% Calculate means
-mean_human_easy = mean(human_draws(:,1));
-mean_human_diff = mean(human_draws(:,2));
-mean_cs_easy = mean(cs_model_draws(:,1));
-mean_cs_diff = mean(cs_model_draws(:,2));
-
-% Calculate SEMs
-sem_human_easy = std(human_draws(:,1)) / sqrt(40);
-sem_human_diff = std(human_draws(:,2)) / sqrt(40);
-sem_cs_easy = std(cs_model_draws(:,1)) / sqrt(40);
-sem_cs_diff = std(cs_model_draws(:,2)) / sqrt(40);
-
-% Create means matrix
-means_matrix = [mean_human_easy, mean_cs_easy; 
-                mean_human_diff, mean_cs_diff];
-
-figure;
-% Plot grouped bars
-h = bar(means_matrix);
-
-% Add error bars
-hold on;
-errorbar(h(1).XEndPoints, [mean_human_easy, mean_human_diff], ...
-         [sem_human_easy, sem_human_diff], 'k', 'LineWidth', 1.5, 'CapSize', 10);
-errorbar(h(2).XEndPoints, [mean_cs_easy, mean_cs_diff], ...
-         [sem_cs_easy, sem_cs_diff], 'k', 'LineWidth', 1.5, 'CapSize', 10);
-hold off;
-
-% Customize plot
-set(gca, 'XTick', [1, 2], 'XTickLabel', {'Easy', 'Difficult'});
-ylabel('Mean Value'); % Adjust as needed
-legend(h, {'Human', 'CS Model'});
-title('Comparison of Human and CS Model Draws');
-ylim([0, 10]); % Adjust Y-axis range as needed
-fontsize(gcf, 20, "points");
-
-%% model 2: cs + beta
+%% fit cost-noise model to participant data
 
 % loop over subjects and extarct behavioural data 
 
@@ -443,7 +405,7 @@ for sub = 1:nsubs
 
 end % end of subjects loop
 
-%% plot beta and cs 
+%% plot parameter values and nll (Figure 4 B and C)
 
 % Define Data for Two Conditions
 Cs_0_8_model2          = allsub_fitted_sample_v2(:,1);
@@ -513,15 +475,17 @@ scatter(2 + (rand(size(beta_0_6_model2)) - 0.5) * jitter, beta_0_6_model2, 'fill
 fontsize(gcf, 20, "points");
 hold off;
 
-%% plot nll 
+% plot nll 
 
 % Create Density Plot
 figure;
 [f1, xi1] = ksdensity(allsub_ll_v2(:, 1)); % 0.8 Condition
 [f2, xi2] = ksdensity(allsub_ll_v2(:, 2)); % 0.6 Condition
-plot(xi1, f1, 'r', 'LineWidth', 2); % Density for 0.8
+
+% Plot filled density curves
+fill(xi1, f1, 'r', 'FaceAlpha', 0.5, 'EdgeColor', 'r', 'LineWidth', 2); % Filled density for 0.8
 hold on;
-plot(xi2, f2, 'b', 'LineWidth', 2); % Density for 0.6
+fill(xi2, f2, 'b', 'FaceAlpha', 0.5, 'EdgeColor', 'b', 'LineWidth', 2); % Filled density for 0.6
 
 % Customise Plot
 legend({'0.8 Condition', '0.6 Condition'}, 'Location', 'Best');
@@ -532,50 +496,7 @@ fontsize(gcf, 20, "points");
 hold off;
 
 
-%% plot sampling rates for cs and beta model 2
-
-human_draws         = [easy_avdraws diff_avdraws];
-cs_model_draws      = fit_samples_v2;
-
-% Calculate means
-mean_human_easy = mean(human_draws(:,1));
-mean_human_diff = mean(human_draws(:,2));
-mean_cs_easy = mean(cs_model_draws(:,1));
-mean_cs_diff = mean(cs_model_draws(:,2));
-
-% Calculate SEMs
-sem_human_easy = std(human_draws(:,1)) / sqrt(40);
-sem_human_diff = std(human_draws(:,2)) / sqrt(40);
-sem_cs_easy = std(cs_model_draws(:,1)) / sqrt(40);
-sem_cs_diff = std(cs_model_draws(:,2)) / sqrt(40);
-
-% Create means matrix
-means_matrix = [mean_human_easy, mean_cs_easy; 
-                mean_human_diff, mean_cs_diff];
-
-figure;
-% Plot grouped bars
-h = bar(means_matrix);
-
-% Add error bars
-hold on;
-errorbar(h(1).XEndPoints, [mean_human_easy, mean_human_diff], ...
-         [sem_human_easy, sem_human_diff], 'k', 'LineWidth', 1.5, 'CapSize', 10);
-errorbar(h(2).XEndPoints, [mean_cs_easy, mean_cs_diff], ...
-         [sem_cs_easy, sem_cs_diff], 'k', 'LineWidth', 1.5, 'CapSize', 10);
-hold off;
-
-% Customize plot
-set(gca, 'XTick', [1, 2], 'XTickLabel', {'Easy', 'Difficult'});
-ylabel('Mean Value'); % Adjust as needed
-legend(h, {'Human', 'CS Model'});
-title('Comparison of Human and CS & Beta Model Draws');
-ylim([0, 10]); % Adjust Y-axis range as needed
-fontsize(gcf, 20, "points");
-
-%%
-
-%% model 3: fit beta model 
+%% fit noise model to participant data 
 
 % loop over subjects and extarct behavioural data 
 for sub = 1:nsubs
@@ -718,7 +639,7 @@ for sub = 1:nsubs
 end % end of subjects loop
 
 
-%% plot beta 
+%% plot beta parameter values and nll (Supplementary figure S1 C)
 
 beta_0_8_model2          = allsub_fitted_beta_v3(:,1);
 beta_0_6_model2          = allsub_fitted_beta_v3(:,2);
@@ -755,15 +676,17 @@ scatter(2 + (rand(size(beta_0_6_model2)) - 0.5) * jitter, beta_0_6_model2, 'fill
 fontsize(gcf, 20, "points");
 hold off;
 
-%% plot nll 
+% plot nll 
 
 % Create Density Plot
 figure;
 [f1, xi1] = ksdensity(allsub_ll_v3(:, 1)); % 0.8 Condition
 [f2, xi2] = ksdensity(allsub_ll_v3(:, 2)); % 0.6 Condition
-plot(xi1, f1, 'r', 'LineWidth', 2); % Density for 0.8
+
+% Plot filled density curves
+fill(xi1, f1, 'r', 'FaceAlpha', 0.5, 'EdgeColor', 'r', 'LineWidth', 2); % Filled density for 0.8
 hold on;
-plot(xi2, f2, 'b', 'LineWidth', 2); % Density for 0.6
+fill(xi2, f2, 'b', 'FaceAlpha', 0.5, 'EdgeColor', 'b', 'LineWidth', 2); % Filled density for 0.6
 
 % Customise Plot
 legend({'0.8 Condition', '0.6 Condition'}, 'Location', 'Best');
@@ -773,54 +696,9 @@ title('Density Plot of NLL Values');
 fontsize(gcf, 20, "points");
 hold off;
 
-
-%% plot sampling rates for cs and beta model 2
-
-human_draws         = [easy_avdraws diff_avdraws];
-cs_model_draws      = fit_samples_v3;
-
-% Calculate means
-mean_human_easy = mean(human_draws(:,1));
-mean_human_diff = mean(human_draws(:,2));
-mean_cs_easy = mean(cs_model_draws(:,1));
-mean_cs_diff = mean(cs_model_draws(:,2));
-
-% Calculate SEMs
-sem_human_easy = std(human_draws(:,1)) / sqrt(40);
-sem_human_diff = std(human_draws(:,2)) / sqrt(40);
-sem_cs_easy = std(cs_model_draws(:,1)) / sqrt(40);
-sem_cs_diff = std(cs_model_draws(:,2)) / sqrt(40);
-
-% Create means matrix
-means_matrix = [mean_human_easy, mean_cs_easy; 
-                mean_human_diff, mean_cs_diff];
-
-figure;
-
-% Plot grouped bars
-h = bar(means_matrix);
-
-% Add error bars
-hold on;
-errorbar(h(1).XEndPoints, [mean_human_easy, mean_human_diff], ...
-         [sem_human_easy, sem_human_diff], 'k', 'LineWidth', 1.5, 'CapSize', 10);
-errorbar(h(2).XEndPoints, [mean_cs_easy, mean_cs_diff], ...
-         [sem_cs_easy, sem_cs_diff], 'k', 'LineWidth', 1.5, 'CapSize', 10);
-hold off;
-
-% Customize plot
-set(gca, 'XTick', [1, 2], 'XTickLabel', {'Easy', 'Difficult'});
-ylabel('Mean Value'); % Adjust as needed
-legend(h, {'Human', 'CS Model'});
-title('Comparison of Human and Beta Model Draws');
-ylim([0, 10]); % Adjust Y-axis range as needed
-fontsize(gcf, 20, "points");
-
-
 %% run ideal observer 
 
-%% loop over subjects and extarct behavioural data 
-
+% loop over subjects and extarct behavioural data 
 for sub = 1:nsubs
 
     fprintf('loading beads block data\n')  
@@ -940,7 +818,7 @@ anova_struct        = struct('draws_humans', all_draws, 'correct_humans', all_ac
 
 output_structure    = run_stats(nsubs,anova_struct);
 
-%% exatract multicompare results for ploting with significance stars
+%% exatract multicompare results for ploting with significance stars (Figure 4A)
 
 pc_tables_draws     = output_structure.pc_tables.draws;
 pc_tables_acc       = output_structure.pc_tables.acc;
@@ -966,6 +844,77 @@ plotGroupedBars_v2(mean_draws, std_error_draws, mean_acc, std_error_acc,...
 
 
 %% 
+%% plot all sampling rates and accuracy for all agents (Supplementary figure S1 A)
+
+% Calculate means and SEMs for draws
+nsubs = length(easy_avdraws); % Assuming nsubs is the number of subjects
+
+% Draws: 0.8 condition
+means_draws_08 = [mean(easy_avdraws), mean(allmean_iodraws(:,1)), mean(fit_samples_v1(:,1)), mean(fit_samples_v2(:,1)), mean(fit_samples_v3(:,1))];
+sems_draws_08 = [std(easy_avdraws)/sqrt(nsubs), std(allmean_iodraws(:,1))/sqrt(nsubs), std(fit_samples_v1(:,1))/sqrt(nsubs), std(fit_samples_v2(:,1))/sqrt(nsubs), std(fit_samples_v3(:,1))/sqrt(nsubs)];
+
+% Draws: 0.6 condition
+means_draws_06 = [mean(diff_avdraws), mean(allmean_iodraws(:,2)), mean(fit_samples_v1(:,2)), mean(fit_samples_v2(:,2)), mean(fit_samples_v3(:,2))];
+sems_draws_06 = [std(diff_avdraws)/sqrt(nsubs), std(allmean_iodraws(:,2))/sqrt(nsubs), std(fit_samples_v1(:,2))/sqrt(nsubs), std(fit_samples_v2(:,2))/sqrt(nsubs), std(fit_samples_v3(:,2))/sqrt(nsubs)];
+
+% Calculate means and SEMs for accuracy
+% Accuracy: 0.8 condition
+means_acc_08 = [mean(easy_avacc), mean(all_ioacc(:,1)), mean(fit_correct_v1(:,1)), mean(fit_correct_v2(:,1)), mean(fit_correct_v3(:,1))];
+sems_acc_08 = [std(easy_avacc)/sqrt(nsubs), std(all_ioacc(:,1))/sqrt(nsubs), std(fit_correct_v1(:,1))/sqrt(nsubs), std(fit_correct_v2(:,1))/sqrt(nsubs), std(fit_correct_v3(:,1))/sqrt(nsubs)];
+
+% Accuracy: 0.6 condition
+means_acc_06 = [mean(diff_avacc), mean(all_ioacc(:,2)), mean(fit_correct_v1(:,2)), mean(fit_correct_v2(:,2)), mean(fit_correct_v3(:,2))];
+sems_acc_06 = [std(diff_avacc)/sqrt(nsubs), std(all_ioacc(:,2))/sqrt(nsubs), std(fit_correct_v1(:,2))/sqrt(nsubs), std(fit_correct_v2(:,2))/sqrt(nsubs), std(fit_correct_v3(:,2))/sqrt(nsubs)];
+
+% Define color matrix for the five groups
+colors = [1 0 0; 0 0 1; 0 1 0; 1 1 0; 1 0 1]; % Red, Blue, Green, Yellow, Magenta
+
+% Plot Draws with different colors for each group
+figure;
+subplot(1,2,1);
+bar_handle = bar(1:5, means_draws_08); % Replace 'means_draws_08' with your data
+set(bar_handle, 'FaceColor', 'flat', 'CData', colors);
+hold on;
+errorbar(1:5, means_draws_08, sems_draws_08, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+set(gca, 'XTick', 1:5, 'XTickLabel', {'Humans', 'IO', 'Model 1', 'Model 2', 'Model 3'});
+title('Draws - 0.8 Condition');
+ylabel('Average Draws');
+ylim([0, max([means_draws_08 + sems_draws_08, means_draws_06 + sems_draws_06])]);
+
+subplot(1,2,2);
+bar_handle = bar(1:5, means_draws_06); % Replace 'means_draws_06' with your data
+set(bar_handle, 'FaceColor', 'flat', 'CData', colors);
+hold on;
+errorbar(1:5, means_draws_06, sems_draws_06, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+set(gca, 'XTick', 1:5, 'XTickLabel', {'Humans', 'IO', 'Model 1', 'Model 2', 'Model 3'});
+title('Draws - 0.6 Condition');
+ylabel('Average Draws');
+ylim([0, max([means_draws_08 + sems_draws_08, means_draws_06 + sems_draws_06])]);
+fontsize(gcf, 17, "points");
+
+% Plot Accuracy with different colors for each group
+figure;
+subplot(1,2,1);
+bar_handle = bar(1:5, means_acc_08); % Replace 'means_acc_08' with your data
+set(bar_handle, 'FaceColor', 'flat', 'CData', colors);
+hold on;
+errorbar(1:5, means_acc_08, sems_acc_08, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+set(gca, 'XTick', 1:5, 'XTickLabel', {'Humans', 'IO', 'Model 1', 'Model 2', 'Model 3'});
+title('Accuracy - 0.8 Condition');
+ylabel('Accuracy');
+ylim([0, 1]);
+
+subplot(1,2,2);
+bar_handle = bar(1:5, means_acc_06); % Replace 'means_acc_06' with your data
+set(bar_handle, 'FaceColor', 'flat', 'CData', colors);
+hold on;
+errorbar(1:5, means_acc_06, sems_acc_06, 'k', 'LineStyle', 'none', 'LineWidth', 1.5);
+set(gca, 'XTick', 1:5, 'XTickLabel', {'Humans', 'IO', 'Model 1', 'Model 2', 'Model 3'});
+title('Accuracy - 0.6 Condition');
+ylabel('Accuracy');
+ylim([0, 1]);
+
+fontsize(gcf, 17, "points");
 
 
 

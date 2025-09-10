@@ -5,7 +5,205 @@ clc
 %% Set Figure-Docking as Default
 set(0, 'DefaultFigureWindowStyle', 'docked')
 
+ %% Run Model Comparison for Each Condition
+
+% load model fitting results
+load('fitting_final.mat')
+
+% Preallocate BIC and AIC for each model per subject per condition
+BIC_model1 = nan(nsubs, conditions);
+AIC_model1 = nan(nsubs, conditions);
+BIC_model2 = nan(nsubs, conditions);
+AIC_model2 = nan(nsubs, conditions);
+BIC_model3 = nan(nsubs, conditions);
+AIC_model3 = nan(nsubs, conditions);
+
+% Loop over subjects and conditions to calculate BIC and AIC
+for sub = 1:nsubs
+    for cond = 1:conditions
+
+        % Get total draws for this subject and condition (sample size D)
+        % D = sum_cond_draws(sub, cond);  % From your fitting code, sum_cond_draws(sub,cond)
+        D = 52;
+        logD = log(D);
+
+        % Model 1: free Cs (k = 1)
+        NegLL1 = allsub_ll(sub, cond);
+        BIC_model1(sub, cond) = 1 * logD + 2 * NegLL1;
+        AIC_model1(sub, cond) = 2 * 1 + 2 * NegLL1;
+
+        % Model 2: free Cs + beta (k = 2)
+        NegLL2 = allsub_ll_v2(sub, cond);
+        BIC_model2(sub, cond) = 2 * logD + 2 * NegLL2;
+        AIC_model2(sub, cond) = 2 * 2 + 2 * NegLL2;
+
+        % Model 3: free beta (k = 1)
+        NegLL3 = allsub_ll_v3(sub, cond);
+        BIC_model3(sub, cond) = 1 * logD + 2 * NegLL3;
+        AIC_model3(sub, cond) = 2 * 1 + 2 * NegLL3;
+    end
+end
+
+% Preallocate best model counts for BIC and AIC per condition
+best_model_counts_BIC = zeros(conditions, 3);  % Rows: conditions, Columns: models
+best_model_counts_AIC = zeros(conditions, 3);
+
+%%
+% Loop over subjects and conditions to determine best model
+for sub = 1:nsubs
+    for cond = 1:conditions
+        
+        % BIC comparison
+        BIC_values = [BIC_model1(sub, cond), BIC_model2(sub, cond), BIC_model3(sub, cond)];
+        [~, best_model_BIC] = min(BIC_values);
+        best_model_counts_BIC(cond, best_model_BIC) = best_model_counts_BIC(cond, best_model_BIC) + 1;
+
+        % AIC comparison
+        AIC_values = [AIC_model1(sub, cond), AIC_model2(sub, cond), AIC_model3(sub, cond)];
+        [~, best_model_AIC] = min(AIC_values);
+        best_model_counts_AIC(cond, best_model_AIC) = best_model_counts_AIC(cond, best_model_AIC) + 1;
+    end
+end
+
+%%
+% Normalize to get proportions
+prop_best_BIC = best_model_counts_BIC / nsubs;
+prop_best_AIC = best_model_counts_AIC / nsubs;
+
+prop_best_AIC = prop_best_AIC'; prop_best_BIC=prop_best_BIC';
+
+% Display results
+disp('Proportion of Subjects Best Fit by Each Model (BIC):');
+disp('Condition | Model 1 (Cs) | Model 2 (Cs+beta) | Model 3 (beta)');
+disp([ (1:conditions)', prop_best_BIC ]);
+
+disp('Proportion of Subjects Best Fit by Each Model (AIC):');
+disp('Condition | Model 1 (Cs) | Model 2 (Cs+beta) | Model 3 (beta)');
+disp([ (1:conditions)', prop_best_AIC ]);
+
+%%
+%% Visualise Model Comparison with Bar Plots (Proportions; Figure 3A)
+figure;
+subplot(1,2,1);
+barHandles = bar(prop_best_BIC'); % Rows: conditions, columns: models
+% Set FaceAlpha for each bar group
+for i = 1:length(barHandles)
+    barHandles(i).FaceAlpha = 0.4; % Set bar transparency to 0.4
+end
+ylim([0 1])
+title('Model Comparison - BIC (Proportions)');
+xlabel('Model');
+ylabel('Proportion of Subjects');
+set(gca, 'XTickLabel', {'CM', 'CNM', 'NM'});
+legend({'0.8 condition', '0.6 condition'}, 'Location', 'Best');
+grid on;
+subplot(1,2,2);
+barHandles = bar(prop_best_AIC');
+% Set FaceAlpha for each bar group
+for i = 1:length(barHandles)
+    barHandles(i).FaceAlpha = 0.4; % Set bar transparency to 0.4
+end
+ylim([0 1])
+title('Model Comparison - AIC (Proportions)');
+xlabel('Model');
+ylabel('Proportion of Subjects');
+set(gca, 'XTickLabel', {'CM', 'CNM', 'NM'});
+legend({'0.8 condition', '0.6 condition'}, 'Location', 'Best');
+grid on;
+fontsize(gcf, 20, "points");
+
+%% Group-Level Statistics on BIC Averages or Differences
+% Rather than pairwise t-tests, perform repeated-measures ANOVA per condition
+% with Model as the factor (three levels), then post-hoc multiple comparisons
+% if ANOVA is significant. This handles overall differences and corrects for
+% multiple comparisons in post-hoc tests.
+
+% Requires Statistics and Machine Learning Toolbox (fitrm, ranova, multcompare)
+
+for cond = 1:conditions
+    
+    % Extract BIC data for this condition (nsubs x 3 models)
+    BIC_data = [BIC_model1(:,cond), BIC_model2(:,cond), BIC_model3(:,cond)];
+    
+    % Compute mean BIC per model for reporting
+    mean_BIC(cond,:) = mean(BIC_data, 1, 'omitnan');
+    fprintf('Mean BIC (Model1,2,3) for Cond %d: %.2f, %.2f, %.2f\n', cond, mean_BIC);
+    
+    % Create table for repeated-measures ANOVA
+    % Columns: Subject ID, Model1 BIC, Model2 BIC, Model3 BIC
+    t = table((1:nsubs)', BIC_data(:,1), BIC_data(:,2), BIC_data(:,3), ...
+              'VariableNames', {'Subject', 'Model1', 'Model2', 'Model3'});
+    
+    % Define repeated-measures model: BIC ~ 1 + (1|Subject)
+    % Within-subject design: Models as repeated measures
+    rm = fitrm(t, 'Model1-Model3 ~ 1', 'WithinDesign', [1 2 3]);
+    
+    % Run repeated-measures ANOVA
+    anova_table = ranova(rm);
+    disp(['Repeated-Measures ANOVA for Cond ' num2str(cond) ':']);
+    disp(anova_table);
+    
+    % Check if overall Model effect is significant
+    p_anova = anova_table.pValue(1);  % p-value for the Model factor (intercept term is the main effect)
+    if p_anova < 0.05
+        fprintf('ANOVA significant for Cond %d (p=%.4f). Performing post-hoc comparisons.\n', cond, p_anova);
+        
+        % Post-hoc multiple comparisons (Tukey's HSD, corrects for multiples)
+        mc = multcompare(rm, 'Time', 'ComparisonType', 'bonferroni');  % 'Time' is the default within-subject factor
+        disp(['Post-Hoc Comparisons (Bonferroni) for Cond ' num2str(cond) ':']);
+        disp(mc);
+    else
+        fprintf('ANOVA not significant for Cond %d (p=%.4f). No post-hoc needed.\n', cond, p_anova);
+    end
+end
+
+%% visualise Figure 3B
+
+% Now, create a single grouped boxplot for all models across both conditions
+% Prepare data in long format for boxchart with grouping
+
+% Prepare data: Ensure ydata is a vector (stacked BIC values)
+% Order: For 0.8: CM, CNM, NM; For 0.6: CM, CNM, NM
+BIC_vector = [BIC_model1(:,1); BIC_model2(:,1); BIC_model3(:,1); ...
+              BIC_model1(:,2); BIC_model2(:,2); BIC_model3(:,2)];
+
+% Categorical for Conditions (x-groups): Match length of BIC_vector
+% Two main groups: 0.8 and 0.6
+Condition = categorical([repmat({'0.8'}, nsubs*3, 1); repmat({'0.6'}, nsubs*3, 1)]);
+
+% Categorical for Models (colours): Match length, repeating for each condition
+Model = categorical([repmat({'CM'}, nsubs, 1); repmat({'CNM'}, nsubs, 1); repmat({'NM'}, nsubs, 1); ...
+                     repmat({'CM'}, nsubs, 1); repmat({'CNM'}, nsubs, 1); repmat({'NM'}, nsubs, 1)]);
+
+% Create grouped boxchart: Group on x by Condition, color by Model
+figure;
+b = boxchart(Condition, BIC_vector, 'GroupByColor', Model, 'Notch', 'on');
+
+% Customise: Assign colors for models (e.g., blue for CM, red for CNM, green for NM)
+% b(1).BoxFaceColor = [0 0 1];  % Blue for CM
+% b(2).BoxFaceColor = [1 0 0];  % Red for CNM
+% b(3).BoxFaceColor = [0 1 0];  % Green for NM
+% b(1).BoxFaceAlpha = 1;        % Filled
+% b(2).BoxFaceAlpha = 1;
+% b(3).BoxFaceAlpha = 1;
+
+ylabel('BIC');
+title('BIC per Condition and Model');
+grid on;
+legend({'CM', 'CNM', 'NM'}, 'Location', 'northeast');
+fontsize(gcf, 20, "points");
+
+
+%% clear all to run model recovery
+
+clear all 
+
+%% \
+% Either run model recovery (takes ~ 5-7 hours to run) or go to line 413 to
+% load the model recovery results and visualise the heatmaps and box plots
+
 %% Define Initial Variables for Simulations
+
 totaltrials         = 52;
 conditions          = 2;
 simvars.ntrials     = totaltrials;
@@ -213,7 +411,11 @@ disp('Average BIC Matrix for 0.6 Condition:');
 disp(['  Cost Model  Cost-Noise Model Noise Model']);
 disp(mean_BIC_06);
 
-%% Visualize confusion and inverse confusion matrices
+%% Visualize confusion and inverse confusion matrices (Figure 3 D,E)
+
+% load the model recovery results because it takes forever to run (2000
+% simulations!!)
+load('model_recovery_final.mat')
 
 figure;
 
@@ -277,101 +479,4 @@ end
 
 fontsize(gcf, 20, "points");
 
-%% Visualize average BIC matrices as heatmaps
-
-figure;
-
-% Average BIC Matrices
-subplot(1, 2, 1);
-imagesc(mean_BIC_08);
-colorbar;
-title('Average BIC - 0.8 Condition');
-xlabel('Fitted Model');
-ylabel('True Model');
-set(gca, 'XTick', 1:3, 'XTickLabel', {'CM', 'CNM', 'NM'});
-set(gca, 'YTick', 1:3, 'YTickLabel', {'CM', 'CNM', 'NM'});
-for i = 1:3
-    for j = 1:3
-        text(j, i, sprintf('%.2f', mean_BIC_08(i,j)), 'Color', 'white', 'HorizontalAlignment', 'center');
-    end
-end
-
-subplot(1, 2, 2);
-imagesc(mean_BIC_06);
-colorbar;
-title('Average BIC - 0.6 Condition');
-xlabel('Fitted Model');
-ylabel('True Model');
-set(gca, 'XTick', 1:3, 'XTickLabel', {'CM', 'CNM', 'NM'});
-set(gca, 'YTick', 1:3, 'YTickLabel', {'CM', 'CNM', 'NM'});
-for i = 1:3
-    for j = 1:3
-        text(j, i, sprintf('%.2f', mean_BIC_06(i,j)), 'Color', 'white', 'HorizontalAlignment', 'center');
-    end
-end
-
-fontsize(gcf, 20, "points");
-
-%% Visualize BIC Distributions as Side-by-Side Boxplots (9 per condition)
-
-% Labels for true-fitted pairs
-pair_labels = {'CM-CM', 'CM-CNM', 'CM-NM', 'CNM-CM', 'CNM-CNM', 'CNM-NM', 'NM-CM', 'NM-CNM', 'NM-NM'};
-
-% For 0.8 Condition: Prepare data as matrix (num_simulations rows x 9 columns)
-BIC_08_matrix = zeros(num_simulations, 9);
-col_idx = 1;
-for true_idx = 1:3
-    for fit_idx = 1:3
-        BIC_08_matrix(:, col_idx) = squeeze(BIC_sims_08(true_idx, fit_idx, :));
-        col_idx = col_idx + 1;
-    end
-end
-
-% Plot for 0.8 Condition using boxplot
-figure('Name', 'BIC Distributions - 0.8 Condition');
-boxplot(BIC_08_matrix, 'Notch', 'off', 'Labels', pair_labels, ...
-        'LabelOrientation', 'horizontal', 'Widths', 0.5);
-ylabel('BIC');
-title('BIC Distributions per True-Fitted Pair (0.8 Condition)');
-grid on;
-set(gca, 'XTickLabelRotation', 45);  % Rotate labels for readability
-fontsize(gcf, 20, "points");
-
-% Customise colours (blue for CM fitted, red for CNM, green for NM)
-h = findobj(gca, 'Tag', 'Box');
-colors = [0 0 1; 1 0 0; 0 1 0; 0 0 1; 1 0 0; 0 1 0; 0 0 1; 1 0 0; 0 1 0];  % Repeating per fitted model
-for j = 1:length(h)
-    patch(get(h(j), 'XData'), get(h(j), 'YData'), colors(j, :), 'FaceAlpha', 0.5);
-end
-legend({'Fitted: CM', 'Fitted: CNM', 'Fitted: NM'}, 'Location', 'northeast');
-
-% For 0.6 Condition: Prepare data similarly
-BIC_06_matrix = zeros(num_simulations, 9);
-col_idx = 1;
-for true_idx = 1:3
-    for fit_idx = 1:3
-        BIC_06_matrix(:, col_idx) = squeeze(BIC_sims_06(true_idx, fit_idx, :));
-        col_idx = col_idx + 1;
-    end
-end
-
-% Plot for 0.6 Condition using boxplot
-figure('Name', 'BIC Distributions - 0.6 Condition');
-boxplot(BIC_06_matrix, 'Notch', 'off', 'Labels', pair_labels, ...
-        'LabelOrientation', 'horizontal', 'Widths', 0.5);
-ylabel('BIC');
-title('BIC Distributions per True-Fitted Pair (0.6 Condition)');
-grid on;
-set(gca, 'XTickLabelRotation', 45);
-fontsize(gcf, 20, "points");
-
-% Customise colours (same as above)
-h = findobj(gca, 'Tag', 'Box');
-for j = 1:length(h)
-    patch(get(h(j), 'XData'), get(h(j), 'YData'), colors(j, :), 'FaceAlpha', 0.5);
-end
-legend({'Fitted: CM', 'Fitted: CNM', 'Fitted: NM'}, 'Location', 'northeast');
-
 %%
-
-
