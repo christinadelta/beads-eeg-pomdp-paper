@@ -1,4 +1,4 @@
-# information_sampling_eeg_beads_paper
+# beads-eeg-pomdp-paper
 
 ## Data and code related to the manuscript: 
 
