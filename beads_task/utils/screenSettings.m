@@ -17,19 +17,4 @@ scrn.height         = scrn.actheight;
 
 
 
-%% define object x and y 
-
-if taskNb == 1 
-    
-    stimdeg             = scrn.stimdeg;
-    
-    % don't change anything here
-    angleradn       = 2 * atan(scrn.width / 2 /scrn.distview);
-    angledeg        = angleradn * (180/pi);
-    pix             = scrn.screenRes(1) / angledeg;
-    scrn.objectx    = round(stimdeg * pix);
-    scrn.objecty    = round(stimdeg * pix);
-
-end
-
 end

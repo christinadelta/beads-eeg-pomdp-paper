@@ -34,13 +34,13 @@ answer          = startup.answer;
 % initial experimental settings
 sub             = str2num(answer{2}); % participant number
 taskName        = answer{1}; 
-taskNb          = 3; 
+taskNb          = 1; 
 sess            = 1;
 
 basedir         = pwd;
 
 % get directories and add utility functions to the path
-wd      = fullfile(basedir, 'experiments');
+wd      = basedir;
 addpath(genpath(fullfile(wd,'utils')));                              % add subfunctions to the path
 
 %% ---------------------------------------

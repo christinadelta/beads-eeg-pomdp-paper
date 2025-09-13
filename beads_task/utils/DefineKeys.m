@@ -13,27 +13,15 @@ KbName('UnifyKeyNames');
 set.code20          = KbName('space');
 set.code21          = KbName('ESCAPE');
 
-if taskNb == 1 || taskNb == 2
-    
-    % Task keys
-    KbName('UnifyKeyNames');
-    set.code1      = KbName('f'); % choose face
-    set.code2      = KbName('h'); % choose house
+ % TASK 1 KEYS
+KbName('UnifyKeyNames');
+set.code1       = KbName('1!'); % 1! = Blue
+set.code2       = KbName('2@'); % 2@ = Green
+set.code3       = KbName('3#'); % 3# = Draw again
 
-elseif taskNb == 3 % beads task
-    
-    % TASK 1 KEYS
-    KbName('UnifyKeyNames');
-    set.code1       = KbName('1!'); % 1! = Blue
-    set.code2       = KbName('2@'); % 2@ = Green
-    set.code3       = KbName('3#'); % 3# = Draw again
-
-    set.code7       = KbName('a'); % answer a
-    set.code8       = KbName('b'); % answer b
-    set.code9       = KbName('c'); % answer c
-    set.code10      = KbName('d'); % answer d
-    
-
-end % end of if statement
+set.code7       = KbName('a'); % answer a
+set.code8       = KbName('b'); % answer b
+set.code9       = KbName('c'); % answer c
+set.code10      = KbName('d'); % answer d
 
 end 
